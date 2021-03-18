@@ -70,29 +70,19 @@ async function handleRequest(event)
 	// API endpoint to run wgsim
 	else if(path.startsWith("/api/v1/sequences"))
 	{
-		// Get user input
+		// Parse chrom/start/stop
+		let seed = url.searchParams.get("seed") || null;
 		let chrom = url.searchParams.get("chrom") || "chr20";
-		let start = +url.searchParams.get("start") || 10e6;
-		let stop = +url.searchParams.get("stop") || start + 1e3;
 		let chromInfo = CHROMS_HG38.filter(d => d.name == chrom).pop();
-		let seed = url.searchParams.get("seed") || "-1";
-		let random = url.searchParams.get("random") || false;
+		// Generate random start position if user doesn't specify one
+		const rng = new RNG(seed);
+		seed = rng.state;  // if seed is null, generates rnd number and stores it in rng.state
+		let start = +url.searchParams.get("start") || rng.nextInt() % Math.floor(chromInfo.size / 2);
+		let stop = +url.searchParams.get("stop") || start + 1e3 - 1;
+		if(stop > chromInfo.size)
+			stop = chromInfo.size;
 
-		// Generate random position
-		if(random) {
-			if(seed == "-1")
-				seed = null;
-			const rng = new RNG(seed);  // seed == null ==> generate rnd number and store in rng.state
-			seed = rng.state;
-			chromInfo = CHROMS_HG38[(rng.nextInt() % 24)];
-			chrom = chromInfo.name;
-			start = rng.nextInt() % Math.floor(chromInfo.size/2);  // avoid random starts too far to the end
-			stop = start + 1e3 - 1;
-			if(stop > chromInfo.size)
-				stop = chromInfo.size;
-		}
-
-		// Wgsim params
+		// Parse wgsim parameters
 		const input_e = url.searchParams.get("error") || "0.02";
 		const input_s = url.searchParams.get("stdev") || "50";
 		const input_N = url.searchParams.get("n") || "10";
@@ -134,7 +124,7 @@ async function handleRequest(event)
 			"-R", input_R,
 			"-X", input_X,
 			"-A", input_A,
-			"-S", seed
+			"-S", (seed || "-1")  // wgsim considers -1 == random seed
 		];
 		if(input_haplotype)
 			params.push("-h");
@@ -166,7 +156,7 @@ async function processFASTA(readable, writable, regionName, params)
 	let encoder = new TextEncoder("utf-8");
 	let decoder = new TextDecoder("utf-8");
 
-    for (;;) {
+	for (;;) {
 		// Process a chunk of data (~4096 bytes)
 		let { value, done } = await reader.read();
 		if (done)
