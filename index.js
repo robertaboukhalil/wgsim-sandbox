@@ -180,10 +180,6 @@ async function processFASTA(readable, writable, regionName, params)
 		if(nbNs == valueStr.length)
 			continue;
 
-// await writer.write(encoder.encode(`\n`));
-// await writer.write(encoder.encode(valueStr));
-// await writer.write(encoder.encode(`\n`));
-
 		let emscripten_module = new Promise((resolve, reject) => {
 			emscripten({
 				instantiateWasm(info, receive) {
@@ -201,21 +197,7 @@ async function processFASTA(readable, writable, regionName, params)
 		Module.callMain([...params, ...`/tmp.fa /r1.fq /r2.fq`.split(" ")]);
 		const outWgsim = FS.readFile("/r1.fq", { encoding: "utf8" });
 		await writer.write(encoder.encode(outWgsim));
-
-		// // Finish previous line
-		// let howManyChars = FASTA_LINELENGTH - lineLength;
-		// let strCompleteLine = valueStr.slice(0, howManyChars) + (howManyChars > valueStr.length ? "" : "\\n");
-		// await writer.write(encoder.encode( strCompleteLine ));
-		// // Output the rest with 60 bp per line
-		// valueStr = valueStr.slice(howManyChars);
-		// if(valueStr != "") {
-		// 	lineLength = valueStr.length % FASTA_LINELENGTH;
-		// 	await writer.write(encoder.encode(
-		// 		valueStr.match(new RegExp(`.{1,${FASTA_LINELENGTH}}`, "g")).join("\\n")
-		// 	));
-		// }
 	}
-	// await writer.write(encoder.encode(`END\n`));
 	await writer.close();
 }
 
