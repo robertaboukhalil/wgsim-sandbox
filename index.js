@@ -109,18 +109,21 @@ async function handleRequest(event)
 			);
 
 		// Prepare wgsim parameters
-		let params = [
-			"-e", input_e,
-			"-s", input_s,
-			"-N", input_N,
-			"-1", input_1,
-			"-2", "1",  // single-ended only
-			"-r", input_r,
-			"-R", input_R,
-			"-X", input_X,
-			"-A", input_A,
-			"-S", (seed || "-1")  // wgsim considers -1 == random seed
-		];
+		let params = {
+			region: `${chrom}:${start}-${stop}`,
+			wgsim:  [
+				"-e", input_e,
+				"-s", input_s,
+				"-N", input_N,
+				"-1", input_1,
+				"-2", "1",  // single-ended only
+				"-r", input_r,
+				"-R", input_R,
+				"-X", input_X,
+				"-A", input_A,
+				"-S", (seed || "-1")  // wgsim considers -1 == random seed
+			]
+		};
 
 		// Fetch FASTA data from AWS
 		const fetchByteStart = getByteOffset(start, chromInfo);
@@ -129,7 +132,7 @@ async function handleRequest(event)
 
 		// Stream the response while running wgsim on each chunk of data we get back from AWS
 		let { readable, writable } = new TransformStream();
-		let bodyPromise = processFASTA(response.body, writable, `${chrom}:${start}-${stop}`, params);
+		let bodyPromise = processFASTA(response.body, writable, params);
 		event.waitUntil(bodyPromise);
 		return new Response(readable, { status: 200, headers: { "Content-Type": "text/plain" } });
 	}
@@ -142,8 +145,9 @@ async function handleRequest(event)
 // -----------------------------------------------------------------------------
 // Stream FASTA
 // -----------------------------------------------------------------------------
-async function processFASTA(readable, writable, regionName, params)
+async function processFASTA(readable, writable, params)
 {
+	// Process data as it's being streamed
 	let reader = readable.getReader();
 	let writer = writable.getWriter();
 	let encoder = new TextEncoder("utf-8");
@@ -181,8 +185,8 @@ async function processFASTA(readable, writable, regionName, params)
 		let FS = await m.module.FS;
 
 		// Write current data to /tmp.fa and run wgsim on that chunk of the reference
-		FS.writeFile("/tmp.fa", `>${regionName}\n${valueStr}`);
-		Module.callMain([...params, ...`/tmp.fa /r1.fq /r2.fq`.split(" ")]);
+		FS.writeFile("/tmp.fa", `>${params.region}\n${valueStr}`);
+		Module.callMain([...params.wgsim, ...`/tmp.fa /r1.fq /r2.fq`.split(" ")]);
 		const outWgsim = FS.readFile("/r1.fq", { encoding: "utf8" });
 		await writer.write(encoder.encode(outWgsim));
 	}
