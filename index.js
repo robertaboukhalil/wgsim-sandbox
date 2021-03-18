@@ -1,12 +1,10 @@
 import homepage from "./home.js";
-import emscripten from "./build/wgsim.js";
+import emscripten from "./wgsim/wgsim.js";
 import { CHROMS_HG38 } from "./data.js";
-
 
 // TODO: fix issue with all N's
 // TODO: check that stop doesn't exceed chrom length when don't specify start/stop pos
 // TODO: UI
-
 
 // -----------------------------------------------------------------------------
 // Config
@@ -28,9 +26,8 @@ const GENOME_HG38 = {
 	genomeSource: "https://registry.opendata.aws/1000-genomes/"
 }
 
-
 // -----------------------------------------------------------------------------
-// Handle fetch
+// Handle requests
 // -----------------------------------------------------------------------------
 
 addEventListener("fetch", event => {
@@ -40,15 +37,13 @@ addEventListener("fetch", event => {
 		event.respondWith(handleRequest(event));
 });
 
-async function handleOptions(event)
-{
-	const request = event.request;
-	const headers = request.headers;
+async function handleOptions(event) {
+	const headers = event.request.headers;
 	if(headers.get("Origin") !== null && headers.get("Access-Control-Request-Method") !== null && headers.get("Access-Control-Request-Headers") !== null)
 		return new Response(null, { headers: {
 			"Access-Control-Max-Age": 86400,
 			...CORS_HEADERS
-		} })
+		}});
 	else
 		return new Response(null, { headers: { Allow: "GET, OPTIONS" } });
 }
@@ -56,7 +51,6 @@ async function handleOptions(event)
 // -----------------------------------------------------------------------------
 // Handle GET requests
 // -----------------------------------------------------------------------------
-
 async function handleRequest(event)
 {
 	const url = new URL(event.request.url);
@@ -113,10 +107,8 @@ async function handleRequest(event)
 		let error = "";
 		if(chromInfo == null)
 			error = `Chromosome '${chrom}' does not exist in hg38`;
-		else if(![start, stop].every(d => Number.isInteger(+d)))
-			error = "Coordinates should be integers.";
-		else if(start < 0 || stop < 0)
-			error = "Coordinates cannot be negative";
+		else if(![start, stop].every(d => Number.isInteger(+d)) || start < 0 || stop < 0)
+			error = "Coordinates should be positive integers.";
 		else if(start >= stop)
 			error = "Start coordinate cannot be larger than stop coordinate";
 		else if(start >= chromInfo.size || stop > chromInfo.size)
@@ -152,7 +144,7 @@ async function handleRequest(event)
 		const fetchByteStop = getByteOffset(stop, chromInfo);
 		let response = await fetch(FASTA_URL, { headers: { Range: `bytes=${fetchByteStart}-${fetchByteStop}` } });
 
-		// Stream the response and run wgsim
+		// Stream the response while running wgsim on each chunk of data we get back from AWS
 		let { readable, writable } = new TransformStream();
 		let bodyPromise = processFASTA(response.body, writable, `${chrom}:${start}-${stop}`, params);
 		event.waitUntil(bodyPromise);
@@ -164,7 +156,6 @@ async function handleRequest(event)
 		return new Response(`404\n`, { status: 404, headers: { "Content-Type": "text/plain" } });
 }
 
-
 // -----------------------------------------------------------------------------
 // Stream FASTA
 // -----------------------------------------------------------------------------
@@ -175,27 +166,11 @@ async function processFASTA(readable, writable, regionName, params)
 	let encoder = new TextEncoder("utf-8");
 	let decoder = new TextDecoder("utf-8");
 
-// await writer.write(encoder.encode(regionName));
-// await writer.write(encoder.encode(params.join("\n")));
-
-	// // Prepare FASTA output
-	// await writer.write(encoder.encode(`{"fasta":">${regionName}`));
-	// let lineLength = 0;
-// let i=0;
-	for (;;) {
-// await writer.write(encoder.encode(`i=${i++}\n`));
+    for (;;) {
 		// Process a chunk of data (~4096 bytes)
 		let { value, done } = await reader.read();
 		if (done)
 			break;
-
-		// // Add break line if previous line had max chars in it ==> lineLength would be 0.
-		// // This happens on the first iteration and when we write 60bp as the last line
-		// if(lineLength == 0)
-		// 	await writer.write(encoder.encode( "\\n" ));
-
-// await writer.write((value));
-// await writer.write(encoder.encode(`\n`));
 
 		// Remove break lines from data received
 		let valueStr = decoder.decode(value).replace(/(\r\n|\n|\r)/gm, "");
