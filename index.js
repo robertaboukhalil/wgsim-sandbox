@@ -91,7 +91,6 @@ async function handleRequest(event)
 		const input_R = url.searchParams.get("indel_frac") || "0.15";
 		const input_X = url.searchParams.get("indel_extend") || "0.3";
 		const input_A = url.searchParams.get("ambiguous_max") || "0.05";
-		const input_haplotype = url.searchParams.get("haplotype") ? true : false;
 
 		// Validate user input
 		let error = "";
@@ -126,8 +125,6 @@ async function handleRequest(event)
 			"-A", input_A,
 			"-S", (seed || "-1")  // wgsim considers -1 == random seed
 		];
-		if(input_haplotype)
-			params.push("-h");
 
 		// Fetch FASTA data from AWS
 		const fetchByteStart = getByteOffset(start, chromInfo);
@@ -157,7 +154,7 @@ async function processFASTA(readable, writable, regionName, params)
 	let decoder = new TextDecoder("utf-8");
 
 	for (;;) {
-		// Process a chunk of data (~4096 bytes)
+		// Process a streamed chunk of data
 		let { value, done } = await reader.read();
 		if (done)
 			break;
@@ -170,6 +167,10 @@ async function processFASTA(readable, writable, regionName, params)
 		if(nbNs == valueStr.length)
 			continue;
 
+		// Initialize the wasm module. For some reason, wgsim.wasm doesn't work
+		// well when it's executed multiple times in a row without reinitializing.
+		// This wasn't the case when I tested this with seqtk, so it's probably
+		// something wgsim-specific, maybe related to things like optind?
 		let emscripten_module = new Promise((resolve, reject) => {
 			emscripten({
 				instantiateWasm(info, receive) {
@@ -183,6 +184,7 @@ async function processFASTA(readable, writable, regionName, params)
 		let Module = await m.module;
 		let FS = await m.module.FS;
 
+		// Write current data to /tmp.fa and run wgsim on that chunk of the reference
 		FS.writeFile("/tmp.fa", `>${regionName}\n${valueStr}`);
 		Module.callMain([...params, ...`/tmp.fa /r1.fq /r2.fq`.split(" ")]);
 		const outWgsim = FS.readFile("/r1.fq", { encoding: "utf8" });
