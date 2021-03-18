@@ -49,13 +49,15 @@ const homepage = `
                         <li><strong>Reference genomes</strong>: <code><a href="https://wgsim.sandbox.bio/api/v1/references" target="_blank">wgsim.sandbox.bio/api/v1/references</a></code></li>
                     </ul>
                     <br />
-    
+
                     <h3>URL Parameters</h3>
                     <ul style="line-height: 1.5em;">
-                        <li><strong>n</strong>: Number of sequences to generate - default: <code>10</code></li>
-                        <li><strong>ref</strong>: Ref genome - default: <code>hg38</code> <small>(only hg38 supported)</small></li>
                         <li><strong>chrom</strong>: Chromosome - default: <code>chr1</code></li>
-                        <li class="mb-4"><strong>length</strong>: Sequence length - default: <code>70</code></li>
+                        <li><strong>start</strong>: Start position - default: <code>random</code></li>
+                        <li><strong>stop</strong>: Stop position - default: <code>start + 1e3</code></li>
+                        <li><strong>length</strong>: Sequence length - default: <code>70</code></li>
+                        <li><strong>n</strong>: Number of sequences per chunk - default: <code>10</code></li>
+                        <li class="mb-4"><strong>ref</strong>: Ref genome - default: <code>hg38</code> <small>(only hg38 supported)</small></li>
                         <li><strong>error</strong>: Base error rate - default: <code>0.02</code></li>
                         <li><strong>indel_frac</strong>: Fraction of indels - default: <code>0.15</code></li>
                         <li><strong>indel_extend</strong>: Probability an indel is extended - default: <code>0.3</code></li>
