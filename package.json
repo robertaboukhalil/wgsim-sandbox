@@ -1,0 +1,13 @@
+{
+  "name": "wgsim.sandbox.bio",
+  "version": "1.0.0",
+  "description": "wgsim API",
+  "main": "index.js",
+  "author": "Robert Aboukhalil <robert.aboukhalil@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "copy-webpack-plugin": "^5.0.3",
+    "exports-loader": "^0.7.0",
+    "shelljs": "^0.8.3"
+  }
+}
