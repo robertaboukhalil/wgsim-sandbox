@@ -2,10 +2,6 @@ import homepage from "./home.js";
 import emscripten from "./wgsim/wgsim.js";
 import { CHROMS_HG38 } from "./data.js";
 
-// TODO: fix issue with all N's
-// TODO: check that stop doesn't exceed chrom length when don't specify start/stop pos
-// TODO: UI
-
 // -----------------------------------------------------------------------------
 // Config
 // -----------------------------------------------------------------------------
@@ -72,7 +68,7 @@ async function handleRequest(event)
 	{
 		// Parse chrom/start/stop
 		let seed = url.searchParams.get("seed") || null;
-		let chrom = url.searchParams.get("chrom") || "chr20";
+		let chrom = url.searchParams.get("chrom") || "chr1";
 		let chromInfo = CHROMS_HG38.filter(d => d.name == chrom).pop();
 		// Generate random start position if user doesn't specify one
 		const rng = new RNG(seed);
@@ -210,7 +206,8 @@ function getByteOffset(pos, chromInfo) {
 		-1;
 }
 
-// Random number generator with seed - https://stackoverflow.com/a/424445
+// Random number generator with seed
+// https://stackoverflow.com/a/424445
 function RNG(seed) {
   // LCG using GCC's constants
   this.m = 0x80000000; // 2**31;

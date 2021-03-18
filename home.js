@@ -45,7 +45,7 @@ const homepage = `
                 <div class="col-md-12">
                     <h3>APIs</h3>
                     <ul style="line-height: 1.5em;">
-                        <li><strong>Run wgsim</strong>: <code><a href="https://wgsim.sandbox.bio/api/v1/sequences?n=10&chrom=chr20&length=70&error=0.02&format=text" target="_blank">wgsim.sandbox.bio/api/v1/sequences</a></code></li>
+                        <li><strong>Run wgsim</strong>: <code><a href="https://wgsim.sandbox.bio/api/v1/sequences?n=10&chrom=chr1&length=70&error=0.02&format=text" target="_blank">wgsim.sandbox.bio/api/v1/sequences</a></code></li>
                         <li><strong>Reference genomes</strong>: <code><a href="https://wgsim.sandbox.bio/api/v1/references" target="_blank">wgsim.sandbox.bio/api/v1/references</a></code></li>
                     </ul>
                     <br />
@@ -54,7 +54,7 @@ const homepage = `
                     <ul style="line-height: 1.5em;">
                         <li><strong>n</strong>: Number of sequences to generate - default: <code>10</code></li>
                         <li><strong>ref</strong>: Ref genome - default: <code>hg38</code> <small>(only hg38 supported)</small></li>
-                        <li><strong>chrom</strong>: Chromosome - default: <code>chr20</code></li>
+                        <li><strong>chrom</strong>: Chromosome - default: <code>chr1</code></li>
                         <li class="mb-4"><strong>length</strong>: Sequence length - default: <code>70</code></li>
                         <li><strong>error</strong>: Base error rate - default: <code>0.02</code></li>
                         <li><strong>indel_frac</strong>: Fraction of indels - default: <code>0.15</code></li>
