@@ -45,7 +45,7 @@ const homepage = `
                 <div class="col-md-12">
                     <h3>APIs</h3>
                     <ul style="line-height: 1.5em;">
-                        <li><strong>Run wgsim</strong>: <code><a href="https://wgsim.sandbox.bio/api/v1/sequences?n=10&chrom=chr1&length=70&error=0.02&format=text" target="_blank">wgsim.sandbox.bio/api/v1/sequences</a></code></li>
+                        <li><strong>Run wgsim</strong>: <code><a href="https://wgsim.sandbox.bio/api/v1/sequences?n=10&chrom=chr1&length=70&error=0.02" target="_blank">wgsim.sandbox.bio/api/v1/sequences</a></code></li>
                         <li><strong>Reference genomes</strong>: <code><a href="https://wgsim.sandbox.bio/api/v1/references" target="_blank">wgsim.sandbox.bio/api/v1/references</a></code></li>
                     </ul>
                     <br />
@@ -60,9 +60,8 @@ const homepage = `
                         <li><strong>indel_frac</strong>: Fraction of indels - default: <code>0.15</code></li>
                         <li><strong>indel_extend</strong>: Probability an indel is extended - default: <code>0.3</code></li>
                         <li class="mb-4"><strong>mutation_rate</strong>: Mutation rate - default: <code>0.001</code></li>
-                        <li><strong>seed</strong>: Random seed - default: <code>-1</code></li>
-                        <li><strong>format</strong>: "json" or "text" - default: <code>json</code></li>
-                    </ul>       
+                        <li><strong>seed</strong>: Random seed - default: <code>null</code></li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -79,7 +78,6 @@ const homepage = `
         ref.chromosomes.map(d => {
           elDropdown.options[elDropdown.options.length] = new Option(d.name, d.name);
         });
-        elDropdown.selectedIndex = 20;
     }
 
     async function getSequences() {
