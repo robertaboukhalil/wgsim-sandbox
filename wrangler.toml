@@ -1,0 +1,5 @@
+name = "sandboxbio-wgsim"
+type = "webpack"
+route = "wgsim.sandbox.bio/*"
+workers_dev = false
+webpack_config = "webpack.config.js"
