@@ -177,7 +177,7 @@ async function processFASTA(readable, writable, params)
 		let emscripten_module = new Promise((resolve, reject) => {
 			emscripten({
 				instantiateWasm(info, receive) {
-					let instance = new WebAssembly.Instance(wasm, info);
+					let instance = new WebAssembly.Instance(WASM_MODULE, info);
 					receive(instance);
 					return instance.exports;
 				},
