@@ -153,6 +153,7 @@ async function processFASTA(readable, writable, params)
 	let encoder = new TextEncoder("utf-8");
 	let decoder = new TextDecoder("utf-8");
 
+	let totalBases = 0;
 	for (;;) {
 		// Process a streamed chunk of data
 		let { value, done } = await reader.read();
@@ -166,6 +167,8 @@ async function processFASTA(readable, writable, params)
 		const nbNs = valueStr.split("").filter(d => d == "N").length;
 		if(nbNs == valueStr.length)
 			continue;
+
+		totalBases += valueStr.length;
 
 		// Initialize the wasm module. For some reason, wgsim.wasm doesn't work
 		// well when it's executed multiple times in a row without reinitializing.
@@ -190,6 +193,10 @@ async function processFASTA(readable, writable, params)
 		const outWgsim = FS.readFile("/r1.fq", { encoding: "utf8" });
 		await writer.write(encoder.encode(outWgsim));
 	}
+
+	if(totalBases == 0)
+		await writer.write(encoder.encode(`Error: only found N's in region ${params.region}`));
+
 	await writer.close();
 }
 
