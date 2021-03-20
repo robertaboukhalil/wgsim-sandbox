@@ -1,0 +1,24 @@
+name: Deploy wgsim.sandbox.bio API
+
+on:
+  workflow_dispatch:
+    inputs:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy
+    steps:
+      # Setup
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      # Deploy to Cloudflare Workers
+      - name: Deploy Cloudflare Worker
+        uses: cloudflare/wrangler-action@1.3.0
+        env:
+          USER: root
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
