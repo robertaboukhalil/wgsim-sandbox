@@ -22,6 +22,9 @@ const homepage = `
           <p class="lead">
             API that simulates sequencing reads using <a href="https://github.com/lh3/wgsim">wgsim</a>, which was compiled to WebAssembly and runs as a <a href="https://workers.cloudflare.com/">Cloudflare Worker</a>.
           </p>
+          <p class="lead">
+            For details, check out <a href="https://robaboukhalil.medium.com/serverless-genomics-c412f4bed726">this blog post</a> or see the source code on <a href="https://github.com/robertaboukhalil/wgsim-sandbox">GitHub</a>.
+          </p>
         </div>
       </div>
 
