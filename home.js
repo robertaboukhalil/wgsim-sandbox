@@ -80,7 +80,9 @@ const homepage = `
 
     async function getChromosomes() {
         let ref = (await fetch("https://wgsim.sandbox.bio/api/v1/references").then(d => d.json())).pop();
-        ref.chromosomes.map(d => {
+        ref.chromosomes.map((d, i) => {
+          if(i === 0)
+            elDropdown.value = d.name;
           elDropdown.options[elDropdown.options.length] = new Option(d.name, d.name);
         });
     }
